@@ -1,0 +1,82 @@
+<div class="container ng-scope" ng-app="PublishBlog" ng-controller="PublishCtrl">
+	<div class="row">
+		<div class="col-lg-9">
+			<div class="row info-box ng-scope">
+				<form id="form" name="form" ng-submit="publish()" role="form" class="ng-pristine ng-valid" novalidate="">
+					<div class="form-group">
+							<label class="form-controller">邮箱：</label>
+							<input type="email" name="email" ng-model="data.email"
+								class="form-control input-lg ng-valid-email ng-valid-maxlength ng-valid-minlength ng-dirty ng-valid ng-valid-required"
+								placeholder="电子邮件"  required>
+					</div>
+					
+					<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.required">请填写邮箱!</div>
+					<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.email">请填写正确的电子邮件!</div>
+					<div class="form-group">
+						<label class="form-controller">昵称：</label>
+						<input type="text" class="form-control input-lg ng-valid-email ng-valid-maxlength ng-valid-minlength ng-dirty ng-valid ng-valid-required" name="username" required class="form-control" ng-model="data.username" placeholder="昵称">
+					</div>
+					<div class="alert alert-danger ng-hide"
+							ng-show="form.username.$dirty&amp;&amp;form.username.$error.required">请填写昵称!</div>
+					<div class="form-group">
+						<label class="form-controller">个人网站：</label>
+						<input type="text" class="form-control input-lg ng-valid-email ng-valid-maxlength ng-valid-minlength ng-dirty ng-valid ng-valid-required" name="website" required class="form-control" ng-model="data.website" placeholder="个人网站">
+					</div>
+					<div class="form-group">
+						<label class="form-controller">文章标题：</label>
+						<input type="text" class="form-control input-lg ng-valid-email ng-valid-maxlength ng-valid-minlength ng-dirty ng-valid ng-valid-required" name="title" required class="form-control" ng-model="data.title" placeholder="文章标题">
+					</div>
+					<div class="alert alert-danger ng-hide"
+							ng-show="form.title.$dirty&amp;&amp;form.title.$error.required">请填写文章标题!</div>
+					<div class="form-group">
+					<textarea name="content" style="height:500px;width:100%;visibility:hidden;" ng-model="data.content"></textarea>
+					</div>
+					<button type="submit" class="btn btn-primary">发布</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	var detailEditor;
+	KindEditor.ready(function(K) {
+		detailEditor = K.create('textarea[name="content"]', {
+			resizeType : 1,
+			uploadJson : '${ctx}/manager/upload',
+			allowPreviewEmoticons : false,
+			items : [
+				'fontname', 'fontsize', 'formatblock' ,'|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+				'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+				'insertunorderedlist', '|', 'emoticons', 'image', 'link','|','code','source']
+		});
+	});
+	
+	var PublishBlog = angular.module("PublishBlog", []);
+
+	
+	PublishBlog.controller("PublishCtrl",PublishCtrl);
+	
+	function PublishCtrl($scope, $http){
+		$scope.data = {
+		
+		}
+		
+		$scope.publish = function(){
+			detailEditor.sync();
+			$scope.data.content = $("[name='content']").val();
+			 $http({
+		        method  : 'POST',
+		        url     : '/save',
+		        data    : $.param($scope.data),  // pass in data as strings
+		        headers : { 'Content-Type': 'application/x-www-form-urlencoded' }  // set the headers so angular passing info as form data (not request payload)
+		    }).success(function(data) {
+		    	if(data.status == 'success'){
+		    		window.location.href = "/";
+		    	}
+		    });
+		}
+	}
+	
+</script>

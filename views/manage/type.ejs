@@ -1,0 +1,39 @@
+<div class="row" ng-init="QueryList()">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="bootstrap-admin-panel-content ">
+                <table class="table bootstrap-admin-table-with-actions table-responsive">
+                    <thead>
+                    <tr>
+                        <th width="50%" style="overflow:hidden">栏目名称</th>
+                        <th width="50%">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in items">
+                        <td>{{item.title | substring}}</td>
+                        <td class="actions">
+                            <a href="#type/edit/{{item._id}}">
+                                <button class="btn btn-sm btn-primary">
+                                    <i class="glyphicon glyphicon-pencil"></i> Edit
+                                </button>
+                            </a>
+                            <a href="#type/add">
+                                <button class="btn btn-sm btn-success">
+                                    <i class="glyphicon glyphicon-ok-sign"></i> Add
+                                </button>
+                            </a>
+                            <a href="/manage/type/delete/{{item._id}}">
+                                <button class="btn btn-sm btn-danger">
+                                    <i class="glyphicon glyphicon-trash"></i> Delete
+                                </button>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div id="page"></div>
+            </div>
+        </div>
+    </div>
+</div>

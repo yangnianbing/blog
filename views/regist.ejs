@@ -1,0 +1,117 @@
+<div class="container ng-scope" ng-controller="RegistCtrl" ng-app="Regist">
+	<div class="row">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="row info-box">
+				<div class="col-md-12">
+					<div class="page-header text-center">
+						<h3>注册</h3>
+					</div>
+					<form role="form" name="form" novalidate=""
+						class="ng-invalid ng-invalid-required ng-dirty">
+						<div class="form-group">
+							<input type="email" name="email" ng-model="User.email"
+								class="form-control input-lg ng-valid-email ng-valid-maxlength ng-valid-minlength ng-dirty ng-valid ng-valid-required"
+								placeholder="电子邮件" ng-blur="Verifyemail()" required ng-minlength="3" ng-maxlength="30">
+						</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.required">请填写用户名!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.minlength">用户名的长度为3-30个字符!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.maxlength">用户名的长度为3-30个字符!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="emailExist!=null&amp;&amp;emailExist">该电子邮件已经被其他用户所使用，请更换其他电子邮箱!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.email">请填写正确的电子邮件!</div>
+						<div class="form-group">
+							<input type="password" name="passwd" ng-model="User.passwd"
+								class="form-control input-lg ng-pristine ng-invalid ng-invalid-required ng-valid-maxlength ng-valid-minlength"
+								placeholder="密码" required="" ng-minlength="6" ng-maxlength="20">
+						</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.passwd.$dirty&amp;&amp;form.passwd.$error.required">请填写密码!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.passwd.$dirty&amp;&amp;form.passwd.$error.minlength">密码的长度为6-20个字符!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.passwd.$dirty&amp;&amp;form.passwd.$error.maxlength">密码的长度为6-20个字符!</div>
+						<div class="form-group">
+							<input type="password" name="ConfirmPass"
+								ng-model="User.ConfirmPass"
+								class="form-control input-lg ng-pristine ng-invalid ng-invalid-required ng-valid-maxlength ng-valid-minlength"
+								placeholder="确认密码" required="" ng-minlength="6"
+								ng-maxlength="20">
+						</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.ConfirmPass.$dirty&amp;&amp;form.ConfirmPass.$error.required">请填写确认密码!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.passwd.$dirty&amp;&amp;form.ConfirmPass.$dirty&amp;&amp;User.passwd!=User.ConfirmPass">两次密码不一致!</div>
+						<div class="form-group">
+							<input type="text" name="username" ng-model="User.username"
+								class="form-control input-lg ng-pristine ng-invalid ng-invalid-required ng-valid-maxlength ng-valid-minlength"
+								placeholder="昵称" ng-blur="verifyUsername()" required=""
+								ng-minlength="1" ng-maxlength="20">
+						</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.username.$dirty&amp;&amp;form.username.$error.required">请填写昵称!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.username.$dirty&amp;&amp;form.username.$error.minlength">昵称的长度为1-20个字符!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.username.$dirty&amp;&amp;form.username.$error.maxlength">昵称的长度为1-20个字符!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="usernameExist!=null&amp;&amp;usernameExist">昵称已经存在,请更换其他昵称!</div>
+						<div class="form-group">
+							<button class="btn btn-primary btn-lg btn-block" id="btnSubmit"
+								data-loading-text="loading..." ng-click="Save()"
+								ng-disabled="form.$invalid||emailExist==null||emailExist||usernameExist==null||usernameExist"
+								disabled="disabled">
+								<i class="fa fa-user fa-fw"></i> 注册
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	var Regist = angular.module("Regist", []).controller("RegistCtrl",RegistCtrl);
+	
+	function RegistCtrl($scope, $http){
+		$scope.User = {
+		
+		};
+		$scope.Verifyemail = function(){
+			if($scope.User.email===undefined){
+				return;
+			}
+			var p={email:$scope.User.email};
+			$http.post('/user/verifyEmail',p).success(
+				function(data){
+					$scope.emailExist=data.exist;
+				}
+			);
+		}
+		
+		$scope.verifyUsername = function(){
+			if($scope.User.username===undefined){
+					return;
+			}
+			var p={username:$scope.User.username};
+			$http.post('/user/verifyUsername',p).success(
+				function(data){
+				$scope.usernameExist=data.exist;
+			});
+		}
+		
+		$scope.Save = function(){
+			$http.post('/user/regist',$scope.User).success(
+				function(data){
+					if('success' == data.status){
+						window.location.href = "/"
+					}
+				}
+			);
+		}
+	};
+	
+</script>

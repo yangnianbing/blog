@@ -1,0 +1,2221 @@
+<html><head><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\:form{display:block;}</style>
+<title>Microbingbing博客</title>
+<link rel="stylesheet" href="/stylesheets/prettify.css">
+<link rel="stylesheet" href="/stylesheets/bootstrap.css">
+<link rel="stylesheet" href="/stylesheets/web.css">
+<link rel="stylesheet" href="/stylesheets/font-awesome.min.css">
+<script type="text/javascript" src="/javascripts/prettify.js"></script>
+<script type="text/javascript" src="/javascripts/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="/javascripts/bootstrap.js"></script>
+<script type="text/javascript" src="/javascripts/bootstrap-paginator.js"></script>
+<script type="text/javascript" src="/javascripts/angular.js"></script>
+<script type="text/javascript" src="/javascripts/common.js"> </script>
+</head>
+<body ng-controller="Root" class="ng-scope">
+	<div class="navbar navbar-inverse navbar-static-top ng-scope" style="width: 100%" id="head" ng-controller="HeadCtrl" ng-init="checkIsLogin()">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+			</button>
+			<!-- 				<a class="navbar-brand" href="/">个人博客<small>记录成长</small></a> -->
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav navbar-right" id="menus">
+				<li><a href="/">首页</a></li>
+				<li class="active-hot"><a href="/Publish">投稿</a></li>
+<!-- 				<li><a href="/user/regist" ng-show="!isLogin">注册</a></li> -->
+<!-- 				<li><a href="/user/login" ng-show="!isLogin">登录</a></li> -->
+				<li><a href="/" id="about" rel="popover" data-placement="bottom" data-content="喜欢吃鱼，拿手菜豆瓣鲫鱼" data-original-title="" title="">关于</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	var head = angular.module("head", []).controller("HeadCtrl",HeadCtrl);
+	$("#about").popover({trigger:"hover"});
+	function HeadCtrl($scope, $http){
+		$scope.isLogin = true;
+		$scope.checkIsLogin = function(){
+			$http.post('/user/isLogin').success(
+				function(data){
+					$scope.isLogin = data.isLogin;
+					if(data.username){
+						$("#menus").append('<li><a id="currentUser">'+data.username+'</a></li>');
+					}
+				}
+			);
+		}
+	};
+	
+	angular.bootstrap(document.getElementById("head"), ['head']);
+</script>
+ 
+	<script type="text/javascript">
+
+	var $$scope = "";
+	var $$http = "";
+	function BlogListCtrl($scope, $http){
+		$$scope = $scope;
+		$$http = $http;
+		$scope.items = [];
+		
+		$scope.QueryList = function(){
+	 		$http.post('/list', {
+	 			QueryDate: $scope.QueryDate
+	 		}).success(function(data) {
+	 			var items = data.results;
+	 			var pageCount = data.pageCount;
+	 			$scope.items = $scope.items.concat(items);
+	 			var currentPage = data.currentPage || 1;
+	 			var totalPages = data.pageCount;
+	 			initPageInfo(currentPage, totalPages);
+	 		});
+	 	};
+	}
+	
+	angular.module("list",[]).controller("BlogListCtrl", BlogListCtrl).filter(
+		'to_trusted', ['$sce', function ($sce) {
+			return function (text) {
+	    		return $sce.trustAsHtml(text);
+	    	}
+		}]
+	).filter('author',function(){
+		return function(obj){
+			if(obj.authorId != null){
+				return obj.authorId;
+			}else{
+				return obj.authorInfo;
+			}
+		}
+	})
+	
+	 function initPageInfo(currentPage, pageCount){
+			var options = {
+				currentPage:currentPage,
+				totalPages:pageCount,
+				numberOfPages:20,
+				pageUrl:function(type, page, current){
+					return "javascript:load('"+page+"')";
+				}
+			}
+			$('#page').bootstrapPaginator(options);
+	};
+	
+	function load(pageNum){
+		$$http.post('/list', {
+	 			QueryDate: $$scope.QueryDate,
+	 			pageNum:pageNum
+	 		}).success(function(data) {
+	 			var items = data.results;
+	 			$$scope.items = items;
+	 		});	
+	}
+</script>
+<div class="container ng-scope" ng-app="list" ng-controller="BlogListCtrl" ng-init="QueryList()">
+		<div class="row">
+			<div class="col-lg-9">
+				<!-- ngRepeat: topic in TopicList -->
+				<!-- ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54c795a0c93620284e964b5b#View">angular缓存</a></h1>
+								<span class="text-info ng-binding"><a href="http://cooklife.cn" class="ng-binding">Micro </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-27 09:41:52</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	有时候我们需要在前端缓存数据以减少前端同服务器频繁的交互给服务器带来的压力，或者缓存一些计算成本比较高的数据来减少重复计算带来的效率损耗。
+</p>
+<p>
+	angular中提供了缓存模块来提供前端缓存的支持，这个缓存实际上是一个键值对的对象。
+</p>
+<p>
+	$cacheFactory是一个为angular服务生成缓存对象的服务。
+</p>
+<p>
+	var cache = $cacheFactory('cacheId', {capacity:maxnum});
+</p>
+<p>
+	cacheId为生成缓存对象的id，同时可以通过capacoty来配置最大的缓存大小。
+</p>
+<p>
+	关于缓存有一个非常重要的特性就是失效策略，angular中默认采用的是LRU策略，即<span style="color:#333333;font-family:arial;font-size:13px;line-height:20.0200004577637px;background-color:#FFFFFF;">Least Recently Used (最近最少使用策略)，当缓存的对象数量到达上限的时候，最近最少使用的对象会被移除</span>
+</p>
+<p>
+	<span style="color:#333333;font-family:arial;font-size:13px;line-height:20.0200004577637px;background-color:#FFFFFF;"><br>
+</span>
+</p>
+<p>
+	<span><span style="font-size:13px;line-height:20.0200004577637px;background-color:#FFFFFF;">缓存对象提供了以下的方法来进行存取。</span></span>
+</p>
+<p>
+	<span><span style="font-size:13px;line-height:20.0200004577637px;background-color:#FFFFFF;">info():该方法返回缓存对象本身的信息，包括缓存对象id,缓存大小以及选项</span></span>
+</p>
+<p>
+	<span><span style="font-size:13px;line-height:20.0200004577637px;background-color:#FFFFFF;">put():将对象放入缓存，cache.put('key','value');</span></span>
+</p>
+<p>
+	<span><span style="font-size:13px;line-height:20.0200004577637px;background-color:#FFFFFF;">get():通过键获取其对应的值，如果不存在则返回undefined</span></span>
+</p>
+<p>
+	<span><span style="font-size:13px;line-height:20.0200004577637px;background-color:#FFFFFF;">remove():通过键移除缓存中对象的键值对</span></span>
+</p>
+<p>
+	<span><span style="font-size:13px;line-height:20.0200004577637px;background-color:#FFFFFF;">removeAll()：重置缓存对象，移除所有已缓存的值</span></span>
+</p>
+<p>
+	<span><span style="font-size:13px;line-height:20.0200004577637px;background-color:#FFFFFF;">destory():销毁缓存对象</span></span>
+</p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54c795a0c93620284e964b5b#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54c795a0c93620284e964b5b#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">2</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54c643a6c93620284e964b59#View">angular $resource模块</a></h1>
+								<span class="text-info ng-binding"><a href="http://cooklife.cn" class="ng-binding">Micro </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-26 09:39:50</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	上一篇中讲到使用$http同服务器进行通信，但是功能上比较简单，angularjs还提供了另外一个可选的服务$resource,使用它可以非常方便的同支持restful的服务单进行数据交互。
+</p>
+<h3>
+	安装
+</h3>
+<p>
+	ngResource模块是一个可选的angularjs模块，如果需要使用，我们要单独引用js
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">&lt;script type="text/javascript" src="/javascripts/angular-resource.js"&gt;</pre>
+<h3>
+	应用$resource
+</h3>
+<p>
+	我们并不是直接通过$resource服务本身同服务器通信，$resource是一个创建资源对象的工厂，用来创建同服务端交互的对象。
+</p>
+<p>
+	var User = $resource('/api/users/:userId', {userId:'@id'});
+</p>
+<p>
+	返回的User对象包含了同后端服务进行交互的方法，我们可以把User对象理解成同RESTFul的后端服务进行交互的接口。
+</p>
+<p>
+	该对象包含两个get类型的方法已经三个非get类型的方法。
+</p>
+<p>
+	User.get({id:'123'}, successFn, errorFn);
+</p>
+<p>
+	该方法向url发送一个get请求，并期望一个json类型的响应。这里会向/api/users/123发送一个请求，successFn处理请求成功响应，errorFn处理错误。
+</p>
+<p>
+	<br>
+</p>
+<p>
+	User.query(params, successFn, errorFn)
+</p>
+<p>
+	同get()方法使用类似，一般用来请求多条数据。
+</p>
+<p>
+	<br>
+</p>
+<p>
+	save(params, payload, successFn, errorFn);
+</p>
+<p>
+	save方法会发起一个post请求，params参数用来填充url中变量，对象payload会作为请求体进行发送
+</p>
+<p>
+	<br>
+</p>
+<p>
+	delete(params, payload, successFn,errorFn)
+</p>
+<p>
+	delete方法一个DELETE请求，payload作为消息体进行发送
+</p>
+<p>
+	<br>
+</p>
+<p>
+	remove(params, payload, successFn, errorFn)
+</p>
+<p>
+	同delete类似，不同的是remove用来移除多条数据
+</p>
+<p>
+	<br>
+</p>
+<p>
+	通过$resource生成的对象来同服务器进行交互的时候，我们看可以定义处理成功以及处理失败的函数，这些函数接受的参数不仅仅是简单的对象，而是经过包装之后的对象，会被添加$save(), $remove(), $delete三个方法，可以直接调用这三个方法来后服务端进行交互。
+</p>
+<p>
+</p><pre class="prettyprint lang-js">User.get({id:'123'}, function(user){
+  user.name = 'changeAnotherName';
+  user.$save();
+//这里等价于User.save({id:'123'},{name:'changeAnotherName'})
+});</pre>
+<p></p>
+<h3>
+	扩展$resource
+</h3>
+<p>
+	$resource对常见的五种请求进行封装，我们还可以对$resource进行扩展。
+</p>
+<p>
+	这里要扩展$resource我们需要传入第三个参数，该参数是一个对象。
+</p>
+<p>
+</p><pre class="prettyprint lang-js">$resource('/api/users',{},{
+  sendEmail:{
+    method:'',
+    url:'',
+    params:{},
+    isArray:boolean,
+    transformRequest:函数或者函数数组
+    transformResponse:函数或者函数数组
+    cache:布尔型或缓存对象
+    timeout:数值或promise对象
+    withCredentials:布尔类型
+    responseType:字符串，用来设置XMLHttpRequestResponseType属性
+  }
+})</pre>
+我们也可以将$resource服务当做自定义服务的基础。
+<p></p>
+<p>
+	angular.module('testApp', ['ngResource']),factory('UserService',['$resource', function($resource){
+</p>
+<p>
+	&nbsp; &nbsp; return $resource(url,{},{});
+</p>
+<p>
+	}]);
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54c643a6c93620284e964b59#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54c643a6c93620284e964b59#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">3</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54c5044ec93620284e964b58#View">angular通过$http与服务器通信</a></h1>
+								<span class="text-info ng-binding"><a href="" class="ng-binding"> </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-25 10:57:18</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	angular是一个前端框架，实现了可交互式的页面，但是对于一个web应用，页面上进行展示的数据从哪里来，肯定需要服务端进行支持，那么angular是如何同服务端进行交互的呢？
+</p>
+<h2>
+	$http
+</h2>
+<h2>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">angular提供了$http服务来同服务端进行通信，$http服务队浏览器的XMLHttpRequest对象进行了封装，让我们可以以ajax的方式来从服务器请求数据。</span> 
+</h2>
+<h2>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">$http服务是一个接受一个参数的函数，参数的类型是对象，用来配置生成的http的请求，该函数返回一个promise对象（关于promise规范，可以看看<a href="http://www.cnblogs.com/fsjohnhuang/p/4139172.html" target="_blank">这篇文章</a>）</span> 
+</h2>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;"> </span> 
+</p>
+<pre class="prettyprint lang-js">var promise = $http({
+  method:'GET',
+  url:'/api/user.json'
+});
+
+promise.then(function(resp){}, function(resp){})
+</pre>
+<h4>
+	$http请求的配置对象
+</h4>
+$http()接受的配置对象可以包含以下属性:
+<p>
+	<br>
+</p>
+<p>
+	method:http请求方式，可以为GET,DELETE,HEAD,JSONP,POST,PUT
+</p>
+<p>
+	url:字符串，请求的目标
+</p>
+<p>
+	params:字符串或者对象，会被转换成为查询字符串追加的url后面
+</p>
+<p>
+	data:在发送post请求时使用，作为消息体发送到服务器
+</p>
+<p>
+	headers:一个列表，每个元素都是一个函数，返回http头
+</p>
+<p>
+	xsrfHeaderName(字符串)：保存XSFR令牌的http头的名称
+</p>
+<p>
+	xsrfCookieName:保存XSFR令牌的cookie名称
+</p>
+<p>
+	transformRequest:函数或者函数数组，用来对http请求的请求体和头信息进行转换，并返回转换后的结果。
+</p>
+<p>
+	transformResponse:函数或者函数数组，用来对http响应的响应体和头信息进行转换，并返回转换后的结果。
+</p>
+<p>
+	cache:布尔类型或者缓存对象，设置之后angular会缓存get请求。
+</p>
+<p>
+	timeout:数值，延迟请求
+</p>
+<p>
+	responseType：字符串，响应类型。可以为arraybuffer, blob,document,json, text, moz-blob, moz-chunked-text, moz-chunked-arraybuffer
+</p>
+<h4>
+	$http请求的响应对象
+</h4>
+<p>
+	angular传递给then方法的响应对象包括以下几个属性
+</p>
+<p>
+	data:转换之后的响应体
+</p>
+<p>
+	status:http响应状态码
+</p>
+<p>
+	headers:头信息
+</p>
+<p>
+	config:生成原始请求的设置对象
+</p>
+<p>
+	statusText:http响应状态的文本
+</p>
+<p>
+	<br>
+</p>
+<h2>
+	拦截器
+</h2>
+<p>
+	angular中通过拦截器我们可以从全局层面对请求以及响应进行拦截。
+</p>
+<p>
+	使用拦截器之前，我们通过factory()声明一个服务，然后通过$httpProvider注册拦截器。拦截器分为四种，两种成功拦截器，两种失败拦截器。
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">angular.module('test', []).factory('testInterceptor', function($q){
+ var interceptor = {
+  'request':function(config){
+    return config;
+  },
+  'response':function(resp){
+    return response;
+  },
+  'requestError':function(rejection){
+    return $q.reject(rejection);
+  },
+  'responseError':function(rejection){
+    return rejection
+  }
+ }
+ return interceptor;
+})
+
+angular.module('test', []).config(function($httpProvider){
+ $httpProvider.interceptors.push('testInterceptor');
+})</pre>
+<p>
+	<br>
+</p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54c5044ec93620284e964b58#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54c5044ec93620284e964b58#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">4</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54c36a3ac93620284e964b57#View">angular服务</a></h1>
+								<span class="text-info ng-binding"><a href="http://cooklife.cn" class="ng-binding">Micro </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-24 05:47:38</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	angular的控制器同view绑定，当view不需要的时候控制器就会被销毁，因此控制器的作用域是同其绑定的视图一致的。
+</p>
+<p>
+	服务提供了一种在整个应用的生命周期内保存数据的方法，可以通过服务在控制器间进行通信。
+</p>
+<h2>
+	注册服务
+</h2>
+<h2>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">angular应用中提供了五种方法来创建服务</span> 
+</h2>
+<h2>
+</h2>
+<h4>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;"><strong>factory()</strong></span> 
+</h4>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:18px;"> </span>
+</p>
+<pre class="prettyprint lang-js">angular.module("test").factory('testService', ['$http', function($http){
+    return {
+        funcName : function(){
+
+        }
+    }
+}])</pre>
+<p>
+	<br>
+</p>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:18px;">factory接受两个参数</span> 
+</p>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:18px;">name(字符串)：注册的服务名</span> 
+</p>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:18px;">getfn(函数)：angular创建服务实例的时候被调用，服务是单例，因此生命周期内只会被调用一次。</span> 
+</p>
+<h4>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;"><strong>service()</strong></span> 
+</h4>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:18px;"> </span>
+</p>
+<pre class="prettyprint lang-js">var testConstructor = function($http){
+    this.mehtodName = function(){
+    }
+}
+angular.service('testService', testConstructor);</pre>
+<p>
+	<br>
+</p>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:18px;">service()可以注册一个支持构造函数的服务，方法接受两个参数</span> 
+</p>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:18px;">name(字符串)：注册的服务名</span> 
+</p>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:18px;">constructor(函数)：构造函数，在创建服务实例的时候通过new关键字去实例化服务对象</span> 
+</p>
+<span style="font-size:12px;line-height:1.5;"> 
+<h4 style="font-weight:normal;">
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;"><strong>constant()</strong></span> 
+</h4>
+<p style="font-weight:normal;">
+	<br>
+</p>
+<pre class="prettyprint lang-js">angular.module('test').constant('apiKey', 'value');
+angular.module('test').controller('testController', function(apiKey){
+
+})</pre>
+接受两个参数，注册的常量名以及值
+<p>
+	<br>
+</p>
+<p style="font-weight:normal;">
+	可以将一个已经存在的变量值注册为服务，并注入到应用的其他部分中。
+</p>
+<h4 style="font-weight:normal;">
+	<strong>value()</strong> 
+</h4>
+</span><span style="font-size:12px;font-weight:normal;line-height:1.5;"></span><span style="font-size:12px;font-weight:normal;line-height:1.5;"></span> 
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">同constant()一样，将常量发布为服务，所不同的是，constant()所定义的常量在config配置函数中可以访问得到，value()定义的值在config配置函数中访问不到。 </span>
+</p>
+<h4>
+	provider()
+</h4>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">
+</span></p><pre class="prettyprint lang-js">angular.module('test').provider('testService', {
+    $get : function(){
+        
+    }
+})</pre>
+
+<p></p>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">provider()方法接受两个参数，一个字符串作为注册的服务名称，另外一个是具有$get()方法的对象，$injector在 实例化服务的时候会通过$get创建服务实例。 </span>
+</p>
+<p>
+	何时使用factory()，何时使用provider()?
+</p>
+<p>
+	如果在多个应用中使用同一个服务的时候，需要针对不同的应用对于服务做一些配置，那么我们就应该使用provider()
+</p>
+<p>
+</p><pre class="prettyprint lang-js">angular.module('myApp', []).provider('githubService', function($http) {
+  // 默认的，私有状态
+  var githubUrl = 'https://github.com'
+  setGithubUrl: function(url) {
+  // 通过.config改变默认属性
+  if (url) { githubUrl = url }
+}，
+  method: JSONP, // 如果需要，可以重写
+  $get: function($http) {
+    self = this;
+    return $http({ method: self.method, url: githubUrl + '/events'});
+  }
+});
+
+angular.module('myApp', []).config(function(githubServiceProvider) {
+  githubServiceProvider.setGithubUrl("git@github.com");
+});</pre>
+上面的例子中我们针对应用myApp，在config配置函数中设置了url，对于不同的应用，同一个服务我们可以在这里做不同的配置，而不必修改服务的源码。
+<p></p>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;"><br>
+</span>
+</p>
+<h3>
+	对服务进行装饰
+</h3>
+<p>
+	有些时候，使用angular内置的服务，或者使用第三方封装好的服务，我们想给服务加一些附加的功能，但是又不想修改服务的源码，那么肿么办呢？
+</p>
+<p>
+	我们可以使用$provide.decorator()来对服务进行加强。
+</p>
+<p>
+	decorator()接受两个参数：
+</p>
+<p>
+	name()：需要装饰的服务名称
+</p>
+<p>
+	decoratorFn(fn):函数，我们可以通过$delegate把需要加强的服务注入到该函数内，在decoratorFn中对于原有的服务做一些扩展。
+</p>
+<p>
+	<br>
+</p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54c36a3ac93620284e964b57#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54c36a3ac93620284e964b57#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">4</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54c33ea2c93620284e964b56#View">angular中的依赖注入</a></h1>
+								<span class="text-info ng-binding"><a href="" class="ng-binding"> </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-24 02:41:38</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	使用过java进行开发的人肯定知道大名鼎鼎的spring框架，对于spring的IOC肯定也有所了解，通过配置文件定义好bean之后，如果需要使用这些bean,不需要自己去实例化，而是跟spring这个大容器去要就行了。我们的angular框架也实现了这种机制。
+</p>
+<p>
+	思考一下，如果对象需要获得其对依赖的控制权，有哪几种方式？
+</p>
+<p>
+	1.在对象内部自行创建依赖的实例
+</p>
+<p>
+	2.将依赖定义为全局的，然后通过全局变量去引用
+</p>
+<p>
+	3.在需要的地方通过参数去传递
+</p>
+<p>
+	依赖注入就是通过第三种方式去实现的，通过依赖注入可以出去对依赖关系的硬编码。
+</p>
+<p>
+	我们先来看看一个实例，angular中如何使用依赖注入。
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">angular.module('test',[]).controller('TestController', function($scope, $location){
+
+})</pre>
+我们给模块注册一个控制器，控制器接受两个参数$scope以及$location，这两个参数是angular内置的服务，那么控制器被调用的时候这些服务是如何由谁注入进去的呢？
+<p>
+	<br>
+</p>
+<p>
+	在angular通过$injector服务来管理依赖关系的查询和实例化。
+</p>
+<h3>
+	推断式注入声明
+</h3>
+<h3>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">在上面的例子中，没有任何声明，angularjs认为参数的名称就是依赖的名称，angular根据参数的名称在已注册的服务中进行查找，然后通过$injector将这些参数注入进实例对象</span> 
+</h3>
+<p>
+	injector.invoke(function($scope, $location){})
+</p>
+<p>
+	因为此处是根据参数的名称进行注入的，因此参数的顺序没有关系。
+</p>
+<p>
+	但是在生产环境中，为了缩短网页的加载的时间，我们通常会将js文件进行压缩，参数的名字会被别名替代，这个时候根据参数名称就行注入就行不通了。
+</p>
+<h3>
+	显示注入声明
+</h3>
+<p>
+	通过显示的方法来明确定义函数的依赖关系，即使源代码被压缩了，也能够正常运行。通过$inject属性来显示的进行注入。函数对象的$inject属性是一个数组，其元素是字符串，其值为需要注入的服务名称。
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">angular.module('test',[]).controller('TestController', TestController);
+
+function TestController($scope, $location){
+
+}
+TestController.$injector = ['$scope','$location']</pre>
+<h3>
+	行内注入声明
+</h3>
+<p>
+	<br>
+</p>
+<p>
+	行内的注入声明其实和显示注入声明效果一样，只是在函数定义的时候从行内将参数传入，可以避免在使用过程中使用临时变量。
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">angular.module('test',[]).controller('TestController', ['$scope', '$location',function($scope, $location){
+
+}])</pre></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54c33ea2c93620284e964b56#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54c33ea2c93620284e964b56#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">2</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54bfbbd2fc2d96d1341b00cb#View">angular指令</a></h1>
+								<span class="text-info ng-binding"><a href="http://cooklife.cn" class="ng-binding">Micro </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-21 10:46:42</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	w3c制定的html标准中，html的标签以及标签的属性值有限，不能满足一些特定化的需求，在angular中可以通过指令是对html中的标签以及标签属性做的一个扩展。
+</p>
+<p>
+	首先我们来看看一个内置的指令，了解了解指令到底是一个神马东东？
+</p>
+<p>
+	我们先拿指令ng-src开刀
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">&lt;img src="{{path}}"/&gt;
+&lt;img ng-src="{{path}}"/&gt;</pre>
+<p>
+	<br>
+</p>
+<p>
+	上面两个img标签看出来什么区别没有？好吧如果没有看出来那么我们放到浏览器里面跑一下就知道了
+</p>
+<p>
+	<img src="/pic/3-1.png" alt=""> 
+</p>
+<p>
+	咦，一个图片出来了一个加载失败，仔细看一下一个标签内的属性是src，另外一个是ng-src，f12看看网页的源码
+</p>
+<p>
+	<img src="/pic/3-2.png" alt=""> 
+</p>
+<p>
+	第二个img标签内并没有src属性，但是通过浏览器查看网页源代码，第二个标签内多了一个src属性，切属性值同ng-src一致，什么情况？
+</p>
+<p>
+	原来angular的加载是在网页渲染完毕之后才开始的，当浏览器加载到img标签时，angular的数据绑定并未生效,{{path}}并未被解析，当然加载不到图片。那么ng-src是如何工作的呢？欲知详情，请移步源代码进行查看吧！
+</p>
+<p>
+	<br>
+</p>
+<p>
+	<strong>下面通过一个简单的指令来了解如何创建自定义指令以及如何使用指令？</strong> 
+</p>
+<pre class="prettyprint lang-js">angular.module('myApp', [])
+  .directive('myDirective', function() {
+    return {
+      restrict: 'E',
+      template: '&lt;a href="http://google.com"&gt;Click me to go to Google&lt;/a&gt;'
+    };
+});</pre>
+<p>
+	上面的指令执行时什么效果
+</p>
+<p>
+	&lt;my-directive&gt;&lt;/my-directive&gt;
+</p>
+<p>
+	<img src="/pic/3-4.png" alt=""> 
+</p>
+<p>
+	我们来看看指令中restrict，template这些属性是干嘛用的吧？
+</p>
+<p>
+	通过module.directive('directivename', function(){<span style="line-height:1.5;">})我们可以定义指令，该方法接受两个参数</span>
+</p>
+<p>
+	<span style="line-height:1.5;">1.name</span>
+</p>
+<p>
+	<span style="line-height:1.5;">为指令的名字，用来爱视图中引用特定的指令</span>
+</p>
+<p>
+	<span style="line-height:1.5;">2.factory_function</span>
+</p>
+<p>
+	<span style="line-height:1.5;">该函数返回对象，其中定义了指令的全部行为，$complile服务利用这个方法返回的对象来构造指令的行为</span>
+</p>
+<p>
+	<span style="line-height:1.5;"> </span>
+</p>
+<pre class="prettyprint lang-js">var myModule = angular.module(...);
+   *
+   *   myModule.directive('directiveName', function factory(injectables) {
+ *     var directiveDefinitionObject = {
+ *       priority: 0,
+ *       template: '&lt;div&gt;&lt;/div&gt;', // or // function(tElement, tAttrs) { ... },
+ *       // or
+ *       // templateUrl: 'directive.html', // or // function(tElement, tAttrs) { ... },
+ *       transclude: false,
+ *       restrict: 'A',
+ *       templateNamespace: 'html',
+ *       scope: false,
+ *       controller: function($scope, $element, $attrs, $transclude, otherInjectables) { ... },
+ *       controllerAs: 'stringAlias',
+ *       require: 'siblingDirectiveName', // or // ['^parentDirectiveName', '?optionalDirectiveName', '?^optionalParent'],
+ *       compile: function compile(tElement, tAttrs, transclude) {
+ *         return {
+ *           pre: function preLink(scope, iElement, iAttrs, controller) { ... },
+ *           post: function postLink(scope, iElement, iAttrs, controller) { ... }
+ *         }
+ *         // or
+ *         // return function postLink( ... ) { ... }
+ *       },
+ *       // or
+ *       // link: {
+ *       //  pre: function preLink(scope, iElement, iAttrs, controller) { ... },
+ *       //  post: function postLink(scope, iElement, iAttrs, controller) { ... }
+ *       // }
+ *       // or
+ *       // link: function postLink( ... ) { ... }
+ *     };
+ *     return directiveDefinitionObject;
+ *   });</pre>
+<h3>
+	priority
+</h3>
+<p>
+	当元素上面有多个指令时，指令的执行顺序，数字越大优先级越高，越先执行。
+</p>
+<h3>
+	terminal
+</h3>
+<p>
+	告诉angular停止运行当前元素上比本指令优先级低的指令。
+</p>
+<h3>
+	restrict
+</h3>
+<p>
+	指令的调用方式
+</p>
+<p>
+	<br>
+</p>
+<ul>
+	<li>
+		<span style="line-height:1.5;">'E'</span><span style="line-height:1.5;">-通过元素标签调用 &nbsp; &lt;self-directive&gt;&lt;/self-directive</span><span style="line-height:1.5;">&gt;</span>
+	</li>
+	<li>
+		<span style="line-height:1.5;">'A'-属性调用&lt;div self-directive&gt;&lt;/div&gt;</span>
+	</li>
+	<li>
+		<span style="line-height:1.5;">'C'-类调用&lt;div class='self-directive'&gt;&lt;/div&gt;</span>
+	</li>
+	<li>
+		<span style="line-height:1.5;">'M'-注释调用 &lt;!-- directive: self-directive --&gt;</span>
+	</li>
+</ul>
+<p>
+	<br>
+</p>
+<h3>
+	template
+</h3>
+<p>
+	可以有以下两种形式：
+</p>
+<p>
+	<br>
+</p>
+<ul>
+	<li>
+		<span style="line-height:1.5;">html文本,</span>
+	</li>
+	<li>
+		函数，该函数可以接受两个参数，tElement和tAttrs
+	</li>
+</ul>
+<p>
+	<br>
+</p>
+<h3>
+	templateUrl
+</h3>
+<p>
+	可以有一下类型：
+</p>
+<p>
+	<br>
+</p>
+<ul>
+	<li>
+		<span style="line-height:1.5;">一个代表外部html文件路径的字符串</span>
+	</li>
+	<li>
+		一个可以接受两个参数的函数，tElement和tAttrs，并返回一个外部html路径道德字符串，对于加载过的模板angularjs会将它默认缓存到$templateCache服务中
+	</li>
+</ul>
+<h3>
+	replace
+</h3>
+<p>
+	是否替换指令本省，默认为false，如果设置了该参数，那么指令本身会被指定的模板替代
+</p>
+<p>
+	<br>
+</p>
+<h3>
+	scope
+</h3>
+<p>
+	该参数有两种形式
+</p>
+<p>
+	<br>
+</p>
+<ul>
+	<li>
+		布尔值，可以被设置为true,默认为false,如果设置为true，则会从父作用域继承并创建一个新的作用域对象
+	</li>
+	<li>
+		<span style="line-height:1.5;">隔离作用域，如果被设置为一个对象，那么指令内部会创建一个隔离的作用域，这样模板无法直接访问外部的作用域了，那么有什么方法可以让内部的作用域同外界的作用域进行通信么？</span><span style="line-height:1.5;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 可以通过三种别名方式来同外部的作用域进行一个数据的绑定： &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1.@或者@attr&nbsp;:通过@符号可以将本地的作用域同DOM属性的值进行绑定 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2.=或者=attr：通过=可以将本地作用域上的属性值同父作用域上的属性进行绑定 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 3.&amp;或者&amp;attr：通过&amp;可以对父作用域进行绑定，以便在其中运行函数。
+<pre class="prettyprint lang-js">&lt;input type="text" ng-model="to"/&gt;
+&lt;!-- 调用指令 --&gt;
+&lt;div scope-example ng-model="to" on-send="sendMail(email)" from-name="ari@fullstack.io" /&gt;
+在指令中我们可以这样设置scope对象
+scope: {
+    ngModel: '=', // 将ngModel同指定对象绑定
+    onSend: '&amp;', // 将引用传递给这个方法
+    fromName: '@' // 储存与fromName相关联的字符串
+}<span style="line-height:1.5;font-family:'sans serif', tahoma, verdana, helvetica;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</span></pre>
+</span>
+	</li>
+</ul>
+<p>
+	<br>
+</p>
+<h3>
+	controller
+</h3>
+<p>
+	可以设置为一个字符串或者函数，如果是字符串则会在注册的控制器中寻找对应的控制器。
+</p>
+<p>
+	也可以设置为一个函数作为控制器，可以给该控制器注入任何可以被注入的服务，除此之外有几个特殊的服务可以被注入
+</p>
+<p>
+	$scope:与指令元素相关联的当前作用域
+</p>
+<p>
+	$element:当前指令对应的元素
+</p>
+<p>
+	$attrs:当前元素属性组成的对象
+</p>
+<p>
+	<br>
+</p>
+<h3>
+	compile
+</h3>
+<p>
+	compile可以设置为一个对象或函数，其与link函数是互斥的，如果两者同时设置，那么link会被忽略。在compile函数中，我们可以对DOM进行操作，此时指令和实时数据还没有被放置到DOM中，这个时候操作DOM性能消耗较低。
+</p>
+<h3>
+	link
+</h3>
+<p>
+	链接函数，其函数的签名如下
+</p>
+<p>
+</p><pre class="prettyprint lang-js">link: function(scope, element, attrs, SomeController) {
+// 在这里操作DOM，可以访问required指定的控制器
+}</pre>
+	<p>
+		scope:指令内部的作用域
+	</p>
+	<p>
+		iElement:使用指令的元素
+	</p>
+	<p>
+		iAttrs:元素的属性
+	</p>
+如果require选项提供了一个指令数据，那么第四个参数会是一个由每个指令所对应的控制器组成的数组。
+<p></p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<p>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
+<p>
+	&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+</p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54bfbbd2fc2d96d1341b00cb#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54bfbbd2fc2d96d1341b00cb#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">7</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54be6d79fc2d96d1341b00ca#View">angular表单验证</a></h1>
+								<span class="text-info ng-binding"><a href="http://cooklife.cn" class="ng-binding">Micro </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-20 11:00:09</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	我们对于数据的验证通常都会在前端做一些简单的校验，这样能给与用于更快的输入反馈，减轻后端服务器的压力，同时保护我们的web应用不会被恶意或者错误的输入破坏。
+</p>
+<p>
+	angular提供了一些基础的验证功能，同时我们也可以扩展自己的特殊校验，首先让我来看看angular中提供的校验功能。
+</p>
+<h3>
+	内置指令
+</h3>
+<p>
+	<span>required:</span>校验必填项只需要为输入元素添加属性即可：&lt;inputy type="text" required/&gt;
+</p>
+<p>
+	<span style="line-height:1.5;">ng-minlength:校验最小长度：<span>&lt;inputy type="text" ng-minlenth='5'/&gt;</span></span> 
+</p>
+<p>
+	<span style="line-height:1.5;">ng-pattern:模式匹配：&lt;input type="text" ng-pattern='[a-zA-Z]'/&gt;</span> 
+</p>
+<p>
+	<span style="line-height:1.5;">email:校验电子邮箱：&lt;input type="email"/&gt;</span> 
+</p>
+<p>
+	number:数字校验：&lt;input type="number"&gt;
+</p>
+<p>
+	url:url校验：&lt;input type="url"/&gt;
+</p>
+<h3>
+	自定义指令：
+</h3>
+<p>
+	通过创建指令，我们可以创建自定义验证，这里先来看一个例子，关于指令的具体细节在后面再详细介绍。
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">angular.module('validationExample', [])
+.directive('ensureUnique',function($http) {
+  return {
+    require: 'ngModel',
+    link: function(scope, ele, attrs, c) {
+    scope.$watch(attrs.ngModel, function() {
+      $http({
+        method: 'POST',
+        url: '/api/check/' + attrs.ensureUnique,
+        data: {field: attrs.ensureUnique, valud:scope.ngModel
+      }).success(function(data,status,headers,cfg) {
+        c.$setValidity('unique', data.isUnique);
+      }).error(function(data,status,headers,cfg) {
+        c.$setValidity('unique', false);
+      });
+    });
+  }
+ };
+})
+&lt;input type="text" name="username" ensure-unique="username"&gt;
+使用的时候同其他的校验方式一样</pre>
+<h3>
+	表单中的控制变量
+</h3>
+<p>
+	我们可以通过dom表单元素的属性来判断验证的结果。表单的属性可以在其所属的$scope对象中访问到，而我们又可以访问$scope对象，因此javascript可以间接的访问dom中的表单属性，借助这些属性，我们可以对表单做出实时的响应。包括以下属性：
+</p>
+<p>
+	form.inputFieldName.$pristine:判断用户是否修改了表单，如果未修改值为true
+</p>
+<p>
+	form.inputFieldName.$dirty:只要用户修改过表单，无论是否通过验证都返回true
+</p>
+<p>
+	<span>form.inputFieldName.$valid:用来判断表单的内容是否合法，如果当前表单内容合法，其值为true</span>
+</p>
+<p>
+	<span>form.inputFieldName.$invalid:用来判断表单的内容是否不合法，如果</span>表单内容不合法，值为true
+</p>
+<p>
+	<span>form.inputFieldName.$error:</span>包含当前表单的所有验证内容，以及它们是否合法的信息
+</p>
+<p>
+	<br>
+</p>
+<h3>
+	表单验证样式
+</h3>
+<h3>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">angular处理表单时，会根据表单当前的状态添加一些css样式，我们可以设置这些样式来进行不同的显示</span>
+</h3>
+<p>
+	.ng-pristine{}
+</p>
+<p>
+	.ng-dirty{}
+</p>
+<p>
+	.ng-valid{}
+</p>
+<p>
+	.ng-invalid{}
+</p>
+<p>
+	他们对应着输入的某个特定的状态，与之前的表单属性值对应。
+</p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54be6d79fc2d96d1341b00ca#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54be6d79fc2d96d1341b00ca#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">5</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54bbc8d4fc2d96d1341b00c9#View">如何支持github账号登录</a></h1>
+								<span class="text-info ng-binding"><a href="http://cooklife.cn" class="ng-binding">Micro </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-18 10:53:08</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	有些时候我们需要自己的网站支持第三方账号的登录，这里来讲讲如何让自己的网站支持github账号的支持。
+</p>
+<h2>
+	1.在github上面建立一个应用对应自己需要接入的网站
+</h2>
+<h2>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">首先我们自己需要一个github账号，登录自己的github账号，依次进入菜单Settings-Applications-Register new applications</span> 
+</h2>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;"><img src="/pic/2-1.png" width="400" height="267" alt=""><br>
+</span> 
+</p>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;"><img src="/pic/2-2.png" width="400" height="267" alt=""><br>
+</span> 
+</p>
+<p>
+	新建一个应用，这里的应用就是我们需要支持github用户登录的网站，我们需要填写应用的名称，应用的url,应用的描述，以及github鉴权登录之后回调的地址。这里填写的用户的信息在用户通过github的登录页面进行登录你的网站的时候会展示给用户,如下图：
+</p>
+<p>
+	<img src="/pic/2-3.png" width="400" height="187" alt=""> 
+</p>
+<p>
+	左边画红线的部分，是你的网站需要获取用户的数据，这个获取的数据范围在后面会详细进行介绍。右边画红线的部门就是新建应用时你填写的网站的信息。
+</p>
+<p>
+	注册一个新的引用之后会生成Client Id以及Client Secret,这就是我们接入github 提供的api的凭证。<span id="__kindeditor_bookmark_start_12__"></span>
+</p>
+<p>
+	<br>
+</p>
+<h2>
+	2.自己网站的登录请求重定向到github提供的验证接口
+</h2>
+<p>
+	API文档：https://developer.github.com/v3/oauth/
+</p>
+<p>
+	发送一个get请求到地址：https://github.com/login/oauth/authorize
+</p>
+<p>
+	参数：
+</p>
+<p>
+	</p><table style="border:0px;margin:15px 0px;padding:0px;font-size:14px;width:630px;color:#393939;font-family:'Helvetica Neue', arial, freesans, clean, sans-serif;background-color:#FFFFFF;">
+		<tbody>
+			<tr>
+				<th style="border:1px solid #DDDDDD;vertical-align:top;text-align:center;">
+					参数名
+				</th>
+				<th style="border:1px solid #DDDDDD;vertical-align:top;text-align:center;">
+					类型
+				</th>
+				<th style="border:1px solid #DDDDDD;vertical-align:top;text-align:center;">
+					描述
+				</th>
+			</tr>
+		</tbody>
+		<tbody>
+			<tr>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					client_id
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					string
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					<b>注册应用时的获取的client_id</b>
+				</td>
+			</tr>
+			<tr>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					redirect_uri
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					string
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					github鉴权成功之后，重定向到网站
+				</td>
+			</tr>
+			<tr>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					scope
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					string
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					获取用户的数据范围，具体的取值可以参照github给出的api文档：https://developer.github.com/v3/oauth/#scopes
+				</td>
+			</tr>
+			<tr>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					state
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					string
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					一个随机字符串，github鉴权成功之后会返回。
+				</td>
+			</tr>
+		</tbody>
+	</table>
+用户的登录请求被重定向到github的登录页面，登录成功之后，github会提示用户，需要暴露出的数据，用户确认通过之后，github会重新请求新建应用时候的回调地址，并返回参数code以及state。
+<p></p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">router.get("/login", function(req, resp){
+    var dataStr = (new Date()).valueOf();
+    var path = "https://github.com/login/oauth/authorize";
+    path += '?client_id=' + gitConfig.clientId;
+    path += '&amp;scope='+gitConfig.scope;
+    path += '&amp;state='+ dataStr;
+    resp.redirect(path);
+})</pre>
+<p>
+	<br>
+</p>
+<h2>
+	3.通过github返回的code信息请求token信息
+</h2>
+<p>
+	这里不知道为啥github不支持返回token信息，而是返回一个参数code，通过这个code，再次去请求token。
+</p>
+<p>
+	我们先还是来看看github给出的接口文档：
+</p>
+<p>
+	接口地址：post &nbsp;&nbsp;https://github.com/login/oauth/access_token
+</p>
+<p>
+	参数：
+</p>
+<p>
+	</p><table style="border:0px;margin:15px 0px;padding:0px;font-size:14px;width:630px;color:#393939;font-family:'Helvetica Neue', arial, freesans, clean, sans-serif;background-color:#FFFFFF;">
+		<tbody>
+			<tr>
+				<th style="border:1px solid #DDDDDD;vertical-align:top;text-align:center;">
+					参数名
+				</th>
+				<th style="border:1px solid #DDDDDD;vertical-align:top;text-align:center;">
+					类型
+				</th>
+				<th style="border:1px solid #DDDDDD;vertical-align:top;text-align:center;">
+					描述
+				</th>
+			</tr>
+		</tbody>
+		<tbody>
+			<tr>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					client_id
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					string
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					<strong>Required</strong>. The client ID you received from GitHub when you<a href="https://github.com/settings/applications/new">registered</a>.
+				</td>
+			</tr>
+			<tr>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					client_secret
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					string
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					<strong>Required</strong>. The client secret you received from GitHub when you<a href="https://github.com/settings/applications/new">registered</a>.
+				</td>
+			</tr>
+			<tr>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					code
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					string
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					<strong>Required</strong>. The code you received as a response to&nbsp;<a href="https://developer.github.com/v3/oauth/#redirect-users-to-request-github-access">Step 1</a>.
+				</td>
+			</tr>
+			<tr>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					redirect_uri
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					string
+				</td>
+				<td style="border:1px solid #DDDDDD;font-size:14px;vertical-align:top;">
+					The URL in your app where users will be sent after authorization. See details below about&nbsp;<a href="https://developer.github.com/v3/oauth/#redirect-urls">redirect urls</a>.
+				</td>
+			</tr>
+		</tbody>
+	</table>
+响应：
+<p></p>
+<pre>access_token=e72e16c7e42f292c6912e7710c838347ae178b4a&amp;scope=user%2Cgist&amp;token_type=bearer</pre>
+文档中说明可以设置http请求头accept来返回不同的数据格式，application/json以及application/xml，但是试过之后貌似返回一堆乱码，不知道咋回事。这里就采用默认的键值对格式的字符串，然后自己解析。
+<pre class="prettyprint lang-js">router.get("/loginAfter", function(req, resp){
+    var code = req.param('code');
+    var state = req.param('state');
+    var headers = req.headers;
+    var path = "/login/oauth/access_token";
+    headers.host = 'github.com';
+
+    path += '?client_id=' + gitConfig.clientId;
+    path += '&amp;client_secret='+gitConfig.clientSecret;
+    path += '&amp;code='+ code;
+
+    var opts = {
+        hostname:'github.com',
+        port:'443',
+        path:path,
+        headers:headers,
+        method:'POST'
+    };
+    var req = https.request(opts, function(res){
+        res.setEncoding('utf8');
+        res.on('data', function(data){
+            var args = data.split('&amp;');
+            var tokenInfo = args[0].split("=");
+            var token = tokenInfo[1];
+          
+        })
+    });</pre>
+<h2>
+	4.根据获取的token去获取用户的信息
+<pre>GET https://api.github.com/user?access_token=</pre>
+</h2>
+<h2>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">token拿到了，现在我们只需要通过获取到的token信息去请求用户的信息。</span>
+</h2>
+<h2>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">接口地址：</span><span style="font-size:12px;font-weight:normal;line-height:1.5;">GET https://api.github.com/user?access_token=</span>
+</h2>
+<h2>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">响应格式json:</span>
+</h2>
+<p>
+	<span style="font-size:12px;font-weight:normal;line-height:1.5;">
+</span></p><pre class="prettyprint lang-js">  var url = "https://api.github.com/user?access_token="+token;
+            https.get(url, function(res){
+                res.on('data', function(userInfo){
+                   
+                });
+            });</pre>
+拿到用户的信息之后就好办了，是让用户完善个人信息，还是与自己网站已有的用户账号做绑定就看自己的想法了。
+<p></p>
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54bbc8d4fc2d96d1341b00c9#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54bbc8d4fc2d96d1341b00c9#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">7</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54b7c658fc2d96d1341b00c7#View">angular作用域</a></h1>
+								<span class="text-info ng-binding"><a href="http://www.cooklife.cn" class="ng-binding">Micro </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-15 09:53:28</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	作用域（$scope）在angular中扮演一个很重要的角色，起到连接控制器和视图的关系。
+</p>
+<p>
+	在应用渲染视图并显示在浏览器之前，视图中的模板会和作用域进行绑定，基于动态绑定，视图的变化会立即更新到$scope对象中,而控制器对于视图中属性的更改也会同步到视图中，angular中作用域的结构同DOM类似，可以进行嵌套，子作用域可以访问到父作用域。
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">&lt;script type="text/javascript" src="angular.js"&gt;&lt;/script&gt;
+&lt;div ng-app="TestController" ng-controller="ParentController"&gt;
+    {{name}}
+    &lt;div ng-controller="ChildrenController"&gt;
+        {{name}}
+        	&lt;input type='button' ng-click="changValue()" value="change"&gt;
+    &lt;div&gt;
+&lt;div&gt;
+&lt;script type=""text/javascript"&gt;
+ angular.module("TestController", []).controller('ParentController', ParentController).controller('ChildrenController', ChildrenController);
+
+ function ParentController($scope){
+  $scope.name = 'parent';
+ }
+
+ function ChildrenController($scope){
+  $scope.changValue = function(){
+   $scope.name = 'Child'
+  }
+ }
+&lt;/script&gt;</pre>
+<p>
+	<br>
+</p>
+<p>
+	上面的例子两个div嵌套，每个div分别有一个控制器，但是控制器绑定的作用域并不是同一个作用域，控制器ChildrenController的作用域是ParentController的作用域的子作用域。
+</p>
+<p>
+	<img src="/pic/1-1.png" alt=""> 
+</p>
+<p>
+	我们可以看到ChildrenController的子作用域中并没有定义name属性，但是可以读取父作用域内的name值。
+</p>
+<p>
+	但是点击change按钮之后，会发现子作用域中的name值变为Child，但是父作用域中的name值任为Parent
+</p>
+<p>
+	<img src="/pic/1-2.png" alt=""> 
+</p>
+<p>
+	说道这里，这里有一个关于$scope的最佳实践。
+</p>
+<p>
+	不要将直接将控制器中的$scope赋值为值类型对象（字符串，布尔值或数字），DOM中应该始终通过点操作符.来访问数据。
+</p>
+<p>
+	如果我们将上面的例子改为：
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js"> function ParentController($scope){
+  $scope.model = {
+  	name : 'parent'
+  }
+ }
+ function ChildrenController($scope){
+  $scope.changValue = function(){
+   $scope.model.name = 'Child'
+  }
+ }</pre>
+发现点击change按钮之后，parent中的name值和child中的name值都发生变化了，充分说明了子控制器是复制而非引用name的值。
+<p>
+	<br>
+</p>
+<p>
+	javascript对象要么是值复制要么是引用复制，字符串，数字和布尔类型的变量是值复制。数组、对象和函数则是引用复制。
+</p>
+<p>
+	<br>
+</p>
+<h3>
+	$scope的生命周期
+</h3>
+<p>
+	</p><ul>
+		<li>
+			<span style="line-height:1.5;">创建：在创建控制器或者指令时，angularjs会用$injector创建一个新的作用域，并在这个新建的控制器或者指令运行时将作用域传递进去</span>
+		</li>
+		<li>
+			链接：当angular开始运行时，所有的$scope对象都会附加到或者链接到视图中。这些作用域将会注册当angular应用上下文中发生变化时需要运行的函数
+		</li>
+		<li>
+			更新：时间循环运行时，每个子作用域都执行自己的脏值检测，每个监控函数都会检查变化，如果发生变化则触发指定的回调函数。
+		</li>
+		<li>
+			销毁：当视图不存在时被销毁，这个通常不需要手动进行，可以通过$scope对象上的$destory()方法来清理作用域
+		</li>
+	</ul>
+<p></p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54b7c658fc2d96d1341b00c7#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54b7c658fc2d96d1341b00c7#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">14</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54b67e4dfc2d96d1341b00c6#View">angular模块化</a></h1>
+								<span class="text-info ng-binding"><a href="http://www.cooklife.cn" class="ng-binding">Micro </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-14 10:33:49</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	在之前的数据绑定的例子中，我们在全局的命名空间内实现了一个控制器：
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-html">&lt;!DOCTYPE html&gt; 
+&lt;html ng-app ng-controller="TestController"&gt; 
+&lt;head&gt; 
+&lt;title&gt;Simple app&lt;/title&gt; 
+&lt;script 
+src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.js"&gt; 
+&lt;/script&gt; 
+&lt;/head&gt; 
+&lt;body&gt; 
+&lt;input ng-model="name" type="text" placeholder="Your name"&gt; 
+&lt;h1&gt;Hello {{ name }}&lt;/h1&gt; 
+&lt;script type="text/javascript"&gt;
+    function TestController($scope){
+        $scope.name = 'test';
+    }
+&lt;/script&gt;
+&lt;/body&gt; 
+&lt;/html&gt;</pre>
+这篇文章中我们学习如何给控制器的代码找一个更好的家，避免在全局作用域中去定义，保持全局命名空间的清洁，避免变量名的冲突。
+<p>
+	<br>
+</p>
+<p>
+	angular中提供了angular.module()，该方法可以接受两个参数，第一个是模块的名称，第二个是参数列表，也就是可以被注入到模块中的对象列表。
+</p>
+<pre class="prettyprint lang-js">angular.module('myApp', []);</pre>
+这个方法相当于AngularJS模块的setter方法，是用来定义模块的。
+<p>
+	<br>
+</p>
+<p>
+	第二个参数可选，如果只传入一个参数那么就是获取模块：
+</p>
+<pre class="prettyprint lang-js">angular.module('myApp')</pre>
+这个方法相当于AngularJS模块的getter方法，用来获取对模块的引用。
+<p>
+	<br>
+</p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54b67e4dfc2d96d1341b00c6#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54b67e4dfc2d96d1341b00c6#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">5</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54b3dee0268aeafe034003b6#View">angular数据绑定</a></h1>
+								<span class="text-info ng-binding"><a href="http://cooklife.cn" class="ng-binding">Micro </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-12 10:49:04</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	angular是google的一个神奇的开源框架，通过angular，不需要自己编写或者编写很少的代码就可以实现一个可交互式的页面。
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	<br>
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	首先来了解一下angular中的数据绑定：
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	数据的双向绑定是angular中最基础的功能，其可以将页面html控件的值和js代码的属性值进行绑定，如果我们自己要实现这种绑定，可能需要实现一堆的监听函数，onclick,onchange啥的，但是通过angular，我们可以很少的js代码来实现。
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+<pre class="prettyprint lang-html">&lt;!DOCTYPE html&gt; 
+&lt;html ng-app ng-controller="TestController"&gt; 
+&lt;head&gt; 
+&lt;title&gt;Simple app&lt;/title&gt; 
+&lt;script 
+src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.js"&gt; 
+&lt;/script&gt; 
+&lt;/head&gt; 
+&lt;body&gt; 
+&lt;input ng-model="name" type="text" placeholder="Your name"&gt; 
+&lt;h1&gt;Hello {{ name }}&lt;/h1&gt; 
+&lt;script type="text/javascript"&gt;
+    function TestController($scope){
+        $scope.name = 'test';
+    }
+&lt;/script&gt;
+&lt;/body&gt; 
+&lt;/html&gt;</pre>
+<br>
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	<br>
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	对于传统的web开发，通常都是模板+数据=页面，如果需要使页面动起来，那么我们就需要一些事件去监听数据或者视图的变化，如果发生变化的话就将这种变化重新渲染，从而给用户展现出动态的页面。
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	<br>
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	通过angular，我们如何不需要写一行代码就实现这种动态刷新的呢？
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	angular通过一种称之为脏值检查的机制来检测这种变化，angularjs会记录数据模型所包含的数据在任何特定时间点的值，通过对比相邻两个时间点的值来判断数据是否变“脏”
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	<br>
+</div>
+<div style="font-family:微软雅黑;font-size:14px;background-color:#FFFFFF;">
+	上面的例子中，angular通过对比属性name的值，在两次事件的循环过程中值发生了变化，那么就会将这个值渲染到绑定的对应的dom元素中
+</div></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54b3dee0268aeafe034003b6#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54b3dee0268aeafe034003b6#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">8</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54a66aea268aeafe034003b3#View">linux在如何让进程在后台运行</a></h1>
+								<span class="text-info ng-binding"><a href="cooklife.cn" class="ng-binding">条子 </a>发布于<i class="fa fa-clock-o fa-fw"></i>2015-01-02 05:54:50</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	今天碰到这么一个问题，使用ssh客户端登陆了linux服务器，启动并运行服务之后如果关闭客户端与服务器的连接，这个时候运行于服务器上的服务也会被关闭，如何让命令提交之后不受本地关闭终端端口的影响呢？
+</p>
+<p>
+	首先我们要知道为啥客户端的断开会影响服务端程序的运行？
+</p>
+<p>
+	当用户注销或者网络断开时，终端会受到hangup信号从而关闭其所有的子进程，因此我们要解决的办法有两种途径
+</p>
+<p>
+	<br>
+</p>
+<ol>
+	<li>
+		忽略hup信号。nohup命令
+	</li>
+	<li>
+		者让进程运行在新的会话里从而成为不属于此终端的子进程。setsid命令
+	</li>
+</ol>
+<p>
+	<br>
+</p>
+<h3>
+	nohup
+</h3>
+<p>
+	nohup可以让运行的线程忽略掉hangup信号，我们看看nohup的帮组信息
+</p>
+<pre class="prettyprint lang-bsh">NAME
+       nohup - run a command immune to hangups, with output to a non-tty
+
+SYNOPSIS
+       nohup COMMAND [ARG]...
+       nohup OPTION</pre>
+<p>
+	nohup的语法很简单，只需要在执行的命令之前加上nohup即可。
+</p>
+<p>
+	<br>
+</p>
+<h3>
+	setsid
+</h3>
+<p>
+	如果我们让运行的线程不属于接受hangup信号终端的子线程，那么该运行线程也不会受终端关闭的影响。通过setsid命令在另外一个session中启动服务,看看setsid的帮组信息：
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-bsh">NAME
+       setsid - run a program in a new session
+
+SYNOPSIS
+       setsid program [arg...]
+
+DESCRIPTION
+       setsid runs a program in a new session.</pre>
+<p>
+	<br>
+</p>
+<p>
+	可以看到setsid命令的使用方法同nohup命令同样简单，在运行的命令之前加上setsid命令。
+</p>
+<p>
+	有的时候，我们可能忘记了加上命令nohup或者setsid命令，但是在退出终端的时候却需要服务在后台运行，有挽救的方法么？
+答案是有的，通过disown命令可以让启动的服务在后台稳定的运行，我们先看看disown的帮助信息：
+</p>
+<pre class="prettyprint lang-bsh"> disown [-ar] [-h] [jobspec ...]
+              Without options, each jobspec  is  removed  from  the  table  of
+              active  jobs.   If jobspec is not present, and neither -a nor -r
+              is supplied, the shell鈥檚 notion of the current job is used.   If
+              the -h option is given, each jobspec is not removed from the ta-
+              ble, but is marked so that SIGHUP is not sent to the job if  the
+              shell  receives a SIGHUP.  If no jobspec is present, and neither
+              the -a nor the -r option is supplied, the current job  is  used.
+              If no jobspec is supplied, the -a option means to remove or mark
+              all jobs; the -r option without  a  jobspec  argument  restricts
+              operation  to running jobs.  The return value is 0 unless a job-
+              spec does not specify a valid job.
+</pre>
+<p>
+	-h jobspec:让某个job忽略掉 hup信号
+-ah:让所有的job忽略掉hup信息
+-rh:让正在运行的job忽略掉hup信息
+</p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54a66aea268aeafe034003b3#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54a66aea268aeafe034003b3#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">17</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/5484327bca2b3300007b23ee#View">mongoose数据类型</a></h1>
+								<span class="text-info ng-binding"><a href="" class="ng-binding"> </a>发布于<i class="fa fa-clock-o fa-fw"></i>2014-12-07 06:56:59</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><pre class="prettyprint lang-js">   var ExampleSchema = new Schema({
+      name:String,
+      binary:Buffer,
+      living:Boolean,
+      updated:Date,
+      age:Number,
+      mixed:Schema.Types.Mixed, //该混合类型等同于nested
+      _id:Schema.Types.ObjectId,  //主键
+      _fk:Schema.Types.ObjectId,  //外键
+      array:[],
+      arrOfString:[String],
+      arrOfNumber:[Number],
+      arrOfDate:[Date],
+      arrOfBuffer:[Buffer],
+      arrOfBoolean:[Boolean],
+      arrOfMixed:[Schema.Types.Mixed],
+      arrOfObjectId:[Schema.Types.ObjectId]
+      nested:{
+        stuff:String,
+      }
+    });</pre></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/5484327bca2b3300007b23ee#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/5484327bca2b3300007b23ee#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">31</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54842f5cca2b3300007b23ed#View">mongoose连表查询</a></h1>
+								<span class="text-info ng-binding"><a href="" class="ng-binding"> </a>发布于<i class="fa fa-clock-o fa-fw"></i>2014-12-07 06:43:40</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	mongodb是一种nosql数据库，不同于我们平常使用的关系型数据库，表字段必须是原子的不可拆分的，对于mongodb这种基于文档存储的数据库，其字段值可以为嵌套的文档，对于这种情况我们直接查询就可以将嵌套的文档查询出来
+</p>
+<p>
+	但是某些情况下，我们需要将两个文档分表存储，然后使用外键进行关联。
+</p>
+<p>
+</p><pre class="prettyprint lang-js">var BlogSchema = new mongoose.Schema({
+	authorId:{
+		type:mongoose.Schema.Types.ObjectId,
+		ref:'users'
+	}
+});
+
+var UserSchema = new mongoose.Schema({
+	email:String,
+	username:String,
+	passwd:String,
+	createTime:Date
+});</pre>
+上面的例子中，blog这个表有个引用参照到user表，在blog表中存储的是作者的id，在查询blog的时候我们需要将其作者信息查询出来。
+<p></p>
+<p>
+	通过mongoose我们可以这么写：
+</p>
+<p>
+</p><pre class="prettyprint lang-js">BlogSchema.statics = {
+		findByConditionWithAuthor:function(condition,callback){
+			return this.find(condition).populate('authorId').exec(callback);
+		}
+};</pre>
+	<p>
+		给BlogSchema添加了一个静态的方法，该方法可以通过module直接进行调用，具体的api可以参照mongoose api
+	</p>
+然后在调用的时候
+<p></p>
+<p>
+</p><pre class="prettyprint lang-js">var BlogModule = mongoose.model('blogs',BlogSchema);
+BlogModule.findByConditionWithAuthor({_id:blogId}, function(error,items){
+    console.log(items)
+});
+</pre>
+查询出来的items中就包含了关联表的信息
+<p></p>
+<p>
+</p><pre class="prettyprint lang-js">[ { authorId: 
+     { username: 'micro',
+       passwd: '86962653',
+       createTime: Sat Dec 06 2014 22:28:49 GMT+0800 (中国标准时间),
+       email: '137602812@qq.com',
+       _id: 548312a1d4a1ad00008a9334,
+       __v: 0 },
+    content: '&lt;div style="font-family:微软雅黑;font-size:14px;"&gt;.................&lt;/div&gt;',
+    createTime: Sat Dec 06 2014 22:41:13 GMT+0800 (中国标准时间),
+    title: 'angular ng的内置过滤器',
+    readCount: 1,
+    replyCount: 0,
+    _id: 54831589899a81cc9330d1a9,
+    __v: 0 } ]</pre>
+<p></p></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54842f5cca2b3300007b23ed#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">0</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54842f5cca2b3300007b23ed#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">8</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items --><div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/54831589899a81cc9330d1a9#View">angular过滤器</a></h1>
+								<span class="text-info ng-binding"><a href="" class="ng-binding"> </a>发布于<i class="fa fa-clock-o fa-fw"></i>2014-12-06 10:41:13</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted"><p>
+	<br>
+</p>
+<h1 style="background-color:inherit;">
+	<span style="font-size:14px;font-weight:normal;line-height:21px;">angular中的过滤器提供了linux中管道式处理数据的方式。</span> 
+</h1>
+<h2>
+	<span style="font-size:14px;line-height:21px;">如何自定义一个过滤器</span> 
+</h2>
+<p>
+	angular中创建自定义的过滤器需要放在自己的模块中，通过模块的filter()方法来创建自定义的过滤器。
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">angular.module('app.filters', []).filter('filterName', funtion(){
+    //input是过滤器的输入，进行处理之后返回
+    return function(input){
+        
+    }
+})</pre>
+这里我们来实现一个过滤器，将单词的第一个字母转换为大写。
+<p>
+	<br>
+</p>
+<p>
+	<br>
+</p>
+<pre class="prettyprint lang-js">angular.module('myApp.filters', []).filter('capitalize', function() {
+  return function(input) {
+    // input是我们传入的字符串
+    if (input) {
+      return input[0].toUpperCase() + input.slice(1);
+    }
+});
+
+//调用方式
+{{title | capitalize}}
+</pre>
+<p>
+	<br>
+</p>
+<h2 style="background-color:inherit;">
+	<span style="font-size:14px;font-weight:normal;line-height:1.5;"><strong>ng的内置过滤器</strong></span> 
+</h2>
+<p>
+	<br>
+</p>
+<div style="font-family:微软雅黑;font-size:14px;">
+	<div style="background-color:inherit;">
+		<div style="background-color:inherit;">
+			<div style="background-color:inherit;">
+				<div style="background-color:inherit;">
+					<p style="background-color:inherit;">
+						　　ng内置了九种过滤器，使用方法都非常简单，看文档即懂。不过为了以后不去翻它的文档，我在这里还是做一个详细的记录。
+					</p>
+					<p style="background-color:inherit;">
+						　　1. currency (货币处理)
+					</p>
+					<p style="background-color:inherit;">
+						　　使用currency可以将数字格式化为货币，默认是美元符号，你可以自己传入所需的符号，例如我传入人民币：
+					</p>
+{{num | currency : '￥'}}
+					<p style="background-color:inherit;">
+						　　2. date (日期格式化)
+					</p>
+					<p style="background-color:inherit;">
+						　　原生的js对日期的格式化能力有限，ng提供的date过滤器基本可以满足一般的格式化要求。用法如下：
+					</p>
+{{date | date : 'yyyy-MM-dd hh:mm:ss EEEE'}}
+					<p style="background-color:inherit;">
+						　 　参数用来指定所要的格式，y M d h m s E 分别表示 年 月 日 时 分 秒 星期，你可以自由组合它们。也可以使用不同的个数来限制格式化的位数。另外参数也可以使用特定的描述性字符串，例如“shortTime”将会把时间格式 为12:05 pm这样的。ng提供了八种描述性的字符串，个人觉得这些有点多余，我完全可以根据自己的意愿组合出想要的格式，不愿意去记这么多单词~
+					</p>
+					<p style="background-color:inherit;">
+						　　3. filter(匹配子串)
+					</p>
+					<p style="background-color:inherit;">
+						　 　这个名叫filter的filter（不得不说这名字起的，真让人容易混淆——！）用来处理一个数组，然后可以过滤出含有某个子串 的元素，作为一个子数组来返回。可以是字符串数组，也可以是对象数组。如果是对象数组，可以匹配属性的值。它接收一个参数，用来定义子串的匹配规则。下面 举个例子说明一下参数的用法，我用现在特别火的几个孩子定义了一个数组：
+					</p>
+$scope.childrenArray = [<br>
+{name:'kimi',age:3},<br>
+{name:'cindy',age:4},<br>
+{name:'anglar',age:4},<br>
+{name:'shitou',age:6},<br>
+{name:'tiantian',age:5}<br>
+];$scope.func = function(e){return e.age&gt;4;}{{ childrenArray | filter : 'a' }} //匹配属性值中含有a的<br>
+{{ childrenArray | filter : 4 }} //匹配属性值中含有4的<br>
+{{ childrenArray | filter : {name : 'i'} }} //参数是对象，匹配name属性中含有i的<br>
+{{childrenArray | filter : func }} //参数是函数，指定返回age&gt;4的
+					<p style="background-color:inherit;">
+						　　4. json(格式化json对象)
+					</p>
+					<p style="background-color:inherit;">
+						　 　json过滤器可以把一个js对象格式化为json字符串，没有参数。这东西有什么用呢，我一般也不会在页面上输出一个json串啊，官网说它 可以用来进行调试，嗯，是个不错的选择。或者，也可以用在js中使用，作用就和我们熟悉的JSON.stringify()一样。用法超级简单：
+					</p>
+{{ jsonTest | json}}
+					<p style="background-color:inherit;">
+						　　5. limitTo(限制数组长度或字符串长度)
+					</p>
+					<p style="background-color:inherit;">
+						　　limitTo过滤器用来截取数组或字符串，接收一个参数用来指定截取的长度，如果参数是负值，则从数组尾部开始截取。个人觉得这个filter有点鸡肋，首先只能从数组或字符串的开头/尾部进行截取，其次，js原生的函数就可以代替它了，看看怎么用吧：
+					</p>
+{{ childrenArray | limitTo : 2 }} //将会显示数组中的前两项
+					<p style="background-color:inherit;">
+						　　6. lowercase(小写)
+					</p>
+					<p style="background-color:inherit;">
+						　　把数据转化为全部小写。太简单了，不多解释。同样是很鸡肋的一个filter，没有参数，只能把整个字符串变为小写，不能指定字母。怎么用我都懒得写了。
+					</p>
+					<p style="background-color:inherit;">
+						　　7. uppercase(大写)
+					</p>
+					<p style="background-color:inherit;">
+						　　同上。
+					</p>
+					<p style="background-color:inherit;">
+						　　8. number(格式化数字)
+					</p>
+					<p style="background-color:inherit;">
+						　　number过滤器可以为一个数字加上千位分割，像这样，123,456,789。同时接收一个参数，可以指定float类型保留几位小数：
+					</p>
+{{ num | number : 2 }}
+					<p style="background-color:inherit;">
+						　　9.&nbsp;orderBy(排序)
+					</p>
+					<p style="background-color:inherit;">
+						　 　orderBy过滤器可以将一个数组中的元素进行排序，接收一个参数来指定排序规则，参数可以是一个字符串，表示以该属性名称进行排序。可以是 一个函数，定义排序属性。还可以是一个数组，表示依次按数组中的属性值进行排序（若按第一项比较的值相等，再按第二项比较），还是拿上面的孩子数组举例：
+					</p>
+&lt;div&gt;{{ childrenArray | orderBy : 'age' }}&lt;/div&gt; //按age属性值进行排序，若是-age，则倒序<br>
+&lt;div&gt;{{ childrenArray | orderBy : orderFunc }}&lt;/div&gt; //按照函数的返回值进行排序<br>
+&lt;div&gt;{{ childrenArray | orderBy : ['age','name'] }}&lt;/div&gt; //如果age相同，按照name进行排序
+				</div>
+			</div>
+		</div>
+	</div>
+</div></div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/54831589899a81cc9330d1a9#Reply" target="_blank" class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">1</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/54831589899a81cc9330d1a9#View" target="_blank" class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">24</span></a>
+							</div>
+						</div>
+					</div>
+				</div><!-- end ngRepeat: item in items -->
+				<div id="page" class="pagination"><ul class="pagination"><li class="active"><a href="javascript:load('1')" title="Current page is 1">1</a></li></ul></div>
+			</div>
+		</div>
+</div>
+
+ 
+	<div id="footer">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-4">
+				<h4>
+					 Powered By
+				</h4>
+				<p>
+					<a href="http://www.nodejs.org/" target="_blank">NodeJs</a><br>
+					<a href="https://www.mongodb.org/" target="_blank">Mongodb</a><br>
+				</p>
+			</div>
+			<div class="col-md-4">
+				<h4>程序猿</h4>
+				<p>Copyright ? 2014</p>
+			</div>
+			<div class="col-md-4">
+				<h4>关于我们</h4>
+				<p>
+					<i class="fa fa-smile-o"></i> 我们是一群年轻,自嘲,可爱的程序猿/媛
+				</p>
+				<p>
+				</p>
+			</div>
+		</div>
+	</div>
+</div> 
+
+
+</body></html>

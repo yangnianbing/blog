@@ -1,0 +1,44 @@
+<div class="row" ng-init="QueryList()">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="bootstrap-admin-panel-content ">
+				<table class="table bootstrap-admin-table-with-actions table-responsive">
+					<thead>
+						<tr>
+							<th width="30%" style="overflow:hidden">文章标题</th>
+							<th width="15%">作者</th>
+							<th width="20%">更新时间</th>
+							<th width="35%">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="item in items">
+							<td>{{item.title | substring}}</td>
+							<td>{{(item | author).username}}</td>
+							<td>{{item.createTime | date : 'yyyy-MM-dd hh:mm:ss'}}</td>
+							<td class="actions">
+								<a href="#blog/edit/{{item._id}}">
+									<button class="btn btn-sm btn-primary">
+										<i class="glyphicon glyphicon-pencil"></i> Edit
+									</button>
+								</a>
+									<button class="btn btn-sm btn-success">
+										<i class="glyphicon glyphicon-ok-sign"></i> Confirm
+									</button>
+									<button class="btn btn-sm btn-warning">
+										<i class="glyphicon glyphicon-bell"></i> Notify
+									</button>
+								<a href="/manage/blog/delete/{{item._id}}">
+									<button class="btn btn-sm btn-danger">
+										<i class="glyphicon glyphicon-trash"></i> Delete
+									</button>
+								</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div id="page"></div>
+			</div>
+		</div>
+	</div>
+</div>

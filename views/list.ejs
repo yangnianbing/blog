@@ -1,0 +1,100 @@
+<script type="text/javascript">
+
+	var $$scope = "";
+	var $$http = "";
+	function BlogListCtrl($scope, $http){
+		$$scope = $scope;
+		$$http = $http;
+		$scope.items = [];
+		
+		$scope.QueryList = function(){
+	 		$http.post('/list', {
+	 			QueryDate: $scope.QueryDate
+	 		}).success(function(data) {
+	 			var items = data.results;
+	 			var pageCount = data.pageCount;
+	 			$scope.items = $scope.items.concat(items);
+	 			var currentPage = data.currentPage || 1;
+	 			var totalPages = data.pageCount;
+	 			initPageInfo(currentPage, totalPages);
+	 		});
+	 	};
+	}
+	
+	angular.module("list",[]).controller("BlogListCtrl", BlogListCtrl).filter(
+		'to_trusted', ['$sce', function ($sce) {
+			return function (text) {
+	    		return $sce.trustAsHtml(text);
+	    	}
+		}]
+	).filter('author',function(){
+		return function(obj){
+			if(obj.authorId != null){
+				return obj.authorId;
+			}else{
+				return obj.authorInfo;
+			}
+		}
+	})
+	
+	 function initPageInfo(currentPage, pageCount){
+			var options = {
+				currentPage:currentPage,
+				totalPages:pageCount,
+				numberOfPages:20,
+				pageUrl:function(type, page, current){
+					return "javascript:load('"+page+"')";
+				}
+			}
+			$('#page').bootstrapPaginator(options);
+	};
+	
+	function load(pageNum){
+		$$http.post('/list', {
+	 			QueryDate: $$scope.QueryDate,
+	 			pageNum:pageNum
+	 		}).success(function(data) {
+	 			var items = data.results;
+	 			$$scope.items = items;
+	 		});	
+	}
+</script>
+<div class="container ng-scope" ng-app="list" ng-controller="BlogListCtrl" ng-init="QueryList()">
+		<div class="row">
+			<div class="col-lg-9">
+				<!-- ngRepeat: topic in TopicList -->
+				<div class="row info-box ng-scope" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="https://avatars.githubusercontent.com/u/608342?v=3"
+							class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1><a class="ng-binding" href="/detail/{{item._id}}#View">{{item.title}}</a></h1>
+								<span class="text-info"><a href="{{(item | author).website}}">{{(item | author).username }} </a>发布于<i class="fa fa-clock-o fa-fw"></i>{{item.createTime | date : 'yyyy-MM-dd hh:mm:ss'}}</span>
+							</div>
+						</div>
+						<div class="row" style="max-height: 300px;overflow: hidden;">
+							<div class="col-md-12 ng-binding" style="word-wrap: break-word;" ng-bind-html="item.content | to_trusted">
+							</div>
+						</div>
+						<div class="row text-right info-box-footer">
+							<div class="col-md-3 col-md-offset-6">
+								<a href="/detail/{{item._id}}#Reply" target="_blank"
+									class="text-muted"><i class="fa fa-comments fa-fw"></i> 回复
+									<span class="badge ng-binding">{{item.replyCount}}</span></a>
+							</div>
+							<div class="col-md-3">
+								<a href="/detail/{{item._id}}#View" target="_blank"
+									class="text-muted"><i class="fa fa-eye fa-fw"></i> 阅读全文
+									<span class="badge ng-binding">{{item.readCount}}</span></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="page"></div>
+			</div>
+		</div>
+</div>
+</body>

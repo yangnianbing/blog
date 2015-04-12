@@ -1,0 +1,40 @@
+<div class="navbar navbar-inverse navbar-static-top" style="width: 100%" id="head" ng-controller="HeadCtrl" ng-init="checkIsLogin()">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse"
+				data-target=".navbar-collapse">
+				<span class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<!-- 				<a class="navbar-brand" href="/">个人博客<small>记录成长</small></a> -->
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav navbar-right" id="menus">
+				<li><a href="/">首页</a></li>
+				<li class="active-hot"><a href="/Publish">投稿</a></li>
+<!-- 				<li><a href="/user/regist" ng-show="!isLogin">注册</a></li> -->
+<!-- 				<li><a href="/user/login" ng-show="!isLogin">登录</a></li> -->
+				<li><a href="/" id="about" rel="popover" data-placement="bottom" data-content="喜欢吃鱼，拿手菜豆瓣鲫鱼">关于</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	var head = angular.module("head", []).controller("HeadCtrl",HeadCtrl);
+	$("#about").popover({trigger:"hover"});
+	function HeadCtrl($scope, $http){
+		$scope.isLogin = true;
+		$scope.checkIsLogin = function(){
+			$http.post('/user/isLogin').success(
+				function(data){
+					$scope.isLogin = data.isLogin;
+					if(data.username){
+						$("#menus").append('<li><a id="currentUser">'+data.username+'</a></li>');
+					}
+				}
+			);
+		}
+	};
+	
+	angular.bootstrap(document.getElementById("head"), ['head']);
+</script>

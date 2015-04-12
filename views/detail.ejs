@@ -1,0 +1,175 @@
+<div class="container ng-scope">
+	<div class="row">
+		<div class="col-lg-9">
+			<!--文章内容  -->
+			<div class="row info-box" id="detail" ng-controller="BlogDetailCtrl" ng-init="queryDetail()">
+			<input type="hidden" id="blogId" value="<%=id%>"/>
+				<div class="col-md-1">
+					<img src="https://avatars.githubusercontent.com/u/608342?v=3" class="img-circle">
+				</div>
+				<div class="col-md-11">
+					<div class="row info-box-header">
+							<div class="col-md-12 ng-binding">
+								<h1>{{items[0].title}}</h1>
+								<span class="text-info"><a href="{{(items[0] | author).website}}">{{(items[0] | author).username }} </a>发布于<i class="fa fa-clock-o fa-fw"></i>{{items[0].createTime | date : 'yyyy-MM-dd hh:mm:ss'}}</span>
+							</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12" style="word-wrap: break-word;" ng-bind-html="items[0].content | to_trusted ">
+							
+						</div>
+					</div>
+					<div class="row text-right info-box-footer">
+						<div class="col-md-3 col-md-offset-6">
+							<div class="bdsharebuttonbox bdshare-button-style0-16"
+								data-bd-bind="1416411233405">
+								<a href="#" class="bds_more" data-cmd="more"></a><a href="#"
+									class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a
+									href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a
+									href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a
+									href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a><a
+									href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a
+									href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+							</div>
+							<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+						</div>
+						<div class="col-md-3">
+							<a href="#Reply" class="text-muted"><i
+								class="fa fa-comments fa-fw"></i> 回复 <span class="badge" id="replyCount">{{items[0].replyCount}}</span></a>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div id="CommentList" ng-controller="CommentList" ng-init="queryList()">
+				<div class="row info-box" ng-repeat="item in items">
+					<div class="col-md-1">
+						<img src="/img/avatar.png" class="img-circle">
+					</div>
+					<div class="col-md-11">
+						<div class="row info-box-header">
+							<div class="col-md-12">
+								{{$index + 1}}楼 <a href="/ComingSoon" target="_blank">{{item.username}}</a><i
+									class="fa fa-clock-o fa-fw"></i> 2014-11-14 13:22
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12" ng-bind-html="item.content | to_trusted"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 评论框 -->
+			<div class="row info-box ng-scope" id="PublishComment" ng-controller="PublishCtrl">
+				<form id="publishForm" ng-submit="publish()" role="form" class="ng-pristine ng-valid">
+					<div class="form-group">
+						<label class="form-controller">邮箱：</label><input type="email" class="form-control" require ng-model="data.email" placeholder="邮箱">
+					</div>
+					<div class="form-group">
+						<label class="form-controller">留下你的名字：</label><input type="text" class="form-control" require ng-model="data.username" placeholder="昵称">
+					</div>
+					<div id="Reply" class="form-group">
+					<textarea  name="content" style="height:200px;width:100%;visibility:hidden;" ng-model="data.content"></textarea>
+					</div>
+					<button type="submit" class="btn btn-primary">发布
+					</button>
+				</form>
+			</div>
+			</div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+	var detailApp = angular.module("detail",[]).filter('author',function(){
+		return function(obj){
+			if(obj.authorId != null){
+				return obj.authorId;
+			}else{
+				return obj.authorInfo;
+			}
+		}
+	});
+	
+	var CommentListApp = angular.module("CommentList", []);
+	var PublishComment = angular.module("PublishComment", []);
+
+	
+	PublishComment.controller("PublishCtrl",PublishCtrl);
+	
+	CommentListApp.controller("CommentList", CommentList).filter(
+		'to_trusted', ['$sce', function ($sce) {
+			return function (text) {
+	    		return $sce.trustAsHtml(text);
+	    	}
+		}]
+	)
+	
+	detailApp.controller("BlogDetailCtrl", BlogDetailCtrl).filter(
+		'to_trusted', ['$sce', function ($sce) {
+			return function (text) {
+	    		return $sce.trustAsHtml(text);
+	    	}
+		}]
+	)
+	
+	function CommentList($scope, $http){
+		$scope.items = [];
+		
+		$scope.queryList = function(){
+	 		$http.get('/comment/list/<%=id%>').success(function(data) {
+	 			$scope.items = $scope.items.concat(data);
+	 		});
+		}
+	}
+	
+	var detailEditor;
+	KindEditor.ready(function(K) {
+		detailEditor = K.create('textarea[name="content"]', {
+			resizeType : 1,
+			uploadJson : '${ctx}/manager/upload',
+			allowPreviewEmoticons : false,
+			items : [
+				'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+				'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+				'insertunorderedlist', '|', 'emoticons', 'image', 'link','|','code','source']
+		});
+	});
+	
+	
+	function BlogDetailCtrl($scope, $http){
+		$scope.items = [];
+		
+		$scope.queryDetail = function(){
+	 		$http.post('/detail/<%=id%>').success(function(data) {
+	 			$scope.items = $scope.items.concat(data);
+	 		});
+		}
+	}
+	
+	function PublishCtrl($scope, $http){
+		$scope.data = {
+		
+		}
+		
+		$scope.publish = function(){
+			detailEditor.sync();
+			$scope.data.content = $("[name='content']").val();
+			 $http({
+		        method  : 'POST',
+		        url     : '/comment/save/<%=id%>',
+		        data    : $.param($scope.data),  // pass in data as strings
+		        headers : { 'Content-Type': 'application/x-www-form-urlencoded' }  // set the headers so angular passing info as form data (not request payload)
+		    }).success(function(data) {
+		    	if(data.status == 'success'){
+		    		window.location.reload();
+		    	}
+		    });
+		}
+	}
+	
+	angular.bootstrap(document.getElementById("detail"), ['detail']);
+	angular.bootstrap(document.getElementById("CommentList"), ['CommentList']);
+  	angular.bootstrap(document.getElementById("PublishComment"), ['PublishComment']);
+</script>

@@ -1,0 +1,70 @@
+<div class="container ng-scope" ng-controller="LoginCtrl" ng-app="Login">
+	<div class="row">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="row info-box">
+				<div class="col-md-12">
+					<div class="page-header text-center">
+						<h3>登录</h3>
+					</div>
+					<form role="form" name="form" novalidate=""
+						class="ng-invalid ng-invalid-required ng-dirty">
+						<div class="form-group">
+							<input type="email" name="email" ng-model="User.email"
+								class="form-control input-lg ng-valid-email ng-valid-maxlength ng-valid-minlength ng-dirty ng-valid ng-valid-required"
+								placeholder="电子邮件" required ng-minlength="3" ng-maxlength="30">
+						</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.required">请填写用户名!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.minlength">用户名的长度为3-30个字符!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.maxlength">用户名的长度为3-30个字符!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.email.$dirty&amp;&amp;form.email.$error.email">请填写正确的电子邮件!</div>
+						<div class="form-group">
+							<input type="password" name="passwd" ng-model="User.passwd"
+								class="form-control input-lg ng-pristine ng-invalid ng-invalid-required ng-valid-maxlength ng-valid-minlength"
+								placeholder="密码" required="" ng-minlength="6" ng-maxlength="20">
+						</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.passwd.$dirty&amp;&amp;form.passwd.$error.required">请填写密码!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.passwd.$dirty&amp;&amp;form.passwd.$error.minlength">密码的长度为6-20个字符!</div>
+						<div class="alert alert-danger ng-hide"
+							ng-show="form.passwd.$dirty&amp;&amp;form.passwd.$error.maxlength">密码的长度为6-20个字符!</div>
+							<div id="mistakeTip" class="alert alert-danger ng-hide" ng-show="usernameOrPasswordMistake">用户名或密码错误!</div>
+						<div class="form-group">
+							<button class="btn btn-primary btn-lg btn-block" id="btnSubmit"
+								data-loading-text="loading..." ng-click="Save()"
+								ng-disabled="form.$invalid" disabled="disabled">
+								<i class="fa fa-user fa-fw"></i> 登录
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	var Login = angular.module("Login", []).controller("LoginCtrl",LoginCtrl);
+	
+	function LoginCtrl($scope, $http, $timeout){
+		$scope.User = {
+		
+		};
+		$scope.Save = function(){
+			$http.post('/user/login',$scope.User).success(
+				function(data){
+					if('success' == data.status){
+						window.location.href = "/"
+					}else{
+						$scope.usernameOrPasswordMistake = true;
+						$timeout(function(){$scope.usernameOrPasswordMistake = false}, 2000);
+					}
+				}
+			);
+		}
+	};
+	
+</script>
