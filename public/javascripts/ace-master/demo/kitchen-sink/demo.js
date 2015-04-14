@@ -73,6 +73,7 @@ var saveOption = util.saveOption;
 var fillDropdown = util.fillDropdown;
 var bindCheckbox = util.bindCheckbox;
 var bindDropdown = util.bindDropdown;
+var bindOnClick = util.bindOnClick;
 
 var ElasticTabstopsLite = require("ace/ext/elastic_tabstops_lite").ElasticTabstopsLite;
 
@@ -286,6 +287,7 @@ onResize();
 /*********** options panel ***************************/
 var docEl = document.getElementById("doc");
 var modeEl = document.getElementById("mode");
+var loadFile = document.getElementById("loadFile");
 var wrapModeEl = document.getElementById("soft_wrap");
 var themeEl = document.getElementById("theme");
 var foldingEl = document.getElementById("folding");
@@ -302,7 +304,6 @@ var softTabEl = document.getElementById("soft_tab");
 var behavioursEl = document.getElementById("enable_behaviours");
 
 fillDropdown(docEl, doclist.all);
-
 fillDropdown(modeEl, modelist.modes);
 var modesByName = modelist.modesByName;
 bindDropdown("mode", function(value) {
@@ -374,7 +375,7 @@ function updateUIEditorOptions() {
 themelist.themes.forEach(function(x){ x.value = x.theme });
 fillDropdown(themeEl, {
     Bright: themelist.themes.filter(function(x){return !x.isDark}),
-    Dark: themelist.themes.filter(function(x){return x.isDark}),
+    Dark: themelist.themes.filter(function(x){return x.isDark})
 });
 
 event.addListener(themeEl, "mouseover", function(e){
@@ -476,6 +477,80 @@ bindCheckbox("scrollPastEnd", function(checked) {
     env.editor.setOption("scrollPastEnd", checked);
 });
 
+    bindOnClick("fold-all", function(){
+        env.editor.getSession().foldAll();
+        focusEditor();
+    });
+
+    bindOnClick("unfold-all", function(){
+        env.editor.getSession().unfold();
+        focusEditor();
+    });
+
+    bindOnClick("format", function(){
+        var text = env.editor.getValue();
+        try{
+            var ast = parse(text);
+        }catch (err){
+            throw err;
+        }
+
+        var newText = window.renderAsText(ast);
+        env.editor.setValue(newText);
+        env.editor.clearSelection();
+        env.editor.gotoLine(1);
+        focusEditor();
+    });
+
+    function focusEditor(){
+        env.editor.focus();
+    }
+
+    $('#loadModal .modal-footer .btn-primary').click(function() {
+        var name = $('#loadModal .modal-body select').val()
+        if (!name) {
+            return
+        }
+        var code = localStorage.getItem(name)
+        editor.setValue(code)
+        editor.clearSelection()
+        editor.gotoLine(1)
+        $('#loadModal').modal('hide')
+    })
+    function loadFile(){
+
+
+    }
+
+    $("#dropdownToggle").click(function(){
+        var localFileStr = localStorage.getItem("localFile") !==null ? localStorage.getItem("localFile") : "{}";
+        var localFile = JSON.parse(localFileStr);
+        $("#loadFile").html("");
+        fillDropdown(loadFile,  Object.keys(localFile));
+    });
+
+    $("#saveModal .modal-footer .btn-primary").click(function(){
+        var name = $("#saveModal .modal-body input").val();
+        if(!name){
+            return;
+        }
+        var code = env.editor.getValue();
+        var localFileStr = localStorage.getItem("localFile") !==null ? localStorage.getItem("localFile") : "{}";
+        var localFile = JSON.parse(localFileStr);
+        localFile[name] = code;
+        localStorage.setItem("localFile", JSON.stringify(localFile));
+        $("#saveModal").modal('hide');
+    });
+
+    $('#loadModal form').submit(function(e) {
+        e.preventDefault()
+        $('#loadModal .modal-footer .btn-primary').click()
+    })
+
+    $('#saveModal form').submit(function(e) {
+        e.preventDefault()
+        $('#saveModal .modal-footer .btn-primary').click()
+    })
 bindDropdown("split", function(value) {
     var sp = env.split;
     if (value == "none") {

@@ -171,7 +171,17 @@ exports.bindCheckbox = function(id, callback, noInit) {
     return el;
 };
 
-exports.bindDropdown = function(id, callback, noInit) {
+    exports.bindOnClick = function(id, callback) {
+        if (typeof id === 'string') {
+            var el = document.getElementById(id);
+        } else {
+            var el = id;
+        }
+        el.onclick = callback;
+    }
+
+
+    exports.bindDropdown = function(id, callback, noInit) {
     if (typeof id == "string")
         var el = document.getElementById(id);
     else {
